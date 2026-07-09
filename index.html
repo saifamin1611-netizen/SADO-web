@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SADO | Premium Haute Parfumerie</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #FFFFFF;
+            color: #000000;
+            overflow-x: hidden;
+        }
+        /* Custom Glassmorphism styles */
+        .glass-navbar {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.03);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .dark-glass-hover:hover {
+            background: rgba(0, 0, 0, 0.03);
+            backdrop-filter: blur(15px);
+        }
+        /* Custom dynamic fluid layer inside bottle */
+        .fluid-layer {
+            transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.6s ease;
+        }
+        /* Hide scrollbar defaults */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        /* Smooth view transitions */
+        .page-view {
+            display: none;
+            animation: fadeIn 0.5s ease forwards;
+        }
+        .page-view.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Toast style */
+        #toast {
+            transform: translateX(-50%) translateY(100px);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        .slow-pulse{
+    animation: pulse 10s ease-in-out infinite;
+}
+    </style>
+</head>
+<body class="relative min-h-screen flex flex-col justify-between">
+
+    <div id="toast" class="fixed bottom-8 left-1/2 opacity-0 z-50 bg-black text-white px-6 py-3 rounded-full text-xs font-medium tracking-wider shadow-xl pointer-events-none flex items-center space-x-2">
+        <span id="toast-msg">Product added to cart</span>
+    </div>
+
+    <nav class="glass-navbar fixed top-0 left-0 w-full z-40 h-20 transition-all duration-300">
+        <div class="max-w-7xl mx-auto h-full px-6 flex items-center justify-between">
+            <a href="#" onclick="navigateTo('home')">
+    <img src="https://i.postimg.cc/kghGjbRB/SADO-PNG.png" alt="Logo" class="h-10">
+</a>
+            
+            <div class="hidden md:flex items-center space-x-8 text-xs uppercase tracking-widest font-medium">
+                <a href="#" onclick="navigateTo('home')" class="hover:text-neutral-500 transition-colors duration-200">Home</a>
+                <a href="#" onclick="navigateTo('explore')" class="hover:text-neutral-500 transition-colors duration-200">Explore</a>
+                <a href="#" onclick="navigateTo('customize')" class="hover:text-neutral-500 transition-colors duration-200">Customize</a>
+            </div>
+
+            <div class="flex items-center space-x-5 text-neutral-800">
+                <button onclick="navigateTo('wishlist')" class="relative p-2 hover:text-black transition-colors" title="Wishlist">
+                    <i class="fa-regular fa-heart text-lg"></i>
+                    <span id="wishlist-count" class="absolute top-0 right-0 bg-black text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center opacity-0 transition-opacity">0</span>
+                </button>
+                <button onclick="navigateTo('cart')" class="relative p-2 hover:text-black transition-colors" title="Cart">
+                    <i class="fa-solid fa-bag-shopping text-lg"></i>
+                    <span id="cart-count" class="absolute top-0 right-0 bg-black text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center opacity-0 transition-opacity">0</span>
+                </button>
+                <button id="mobile-menu-btn" class="md:hidden p-2 hover:text-black" title="Menu">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div id="mobile-menu" class="fixed inset-0 bg-white/95 z-50 flex flex-col justify-center items-center space-y-8 text-lg uppercase tracking-[0.2em] font-light transition-all duration-300 transform translate-x-full">
+        <button id="mobile-close-btn" class="absolute top-6 right-6 p-4 text-black text-xl"><i class="fa-solid fa-xmark"></i></button>
+        <a href="#" onclick="navigateTo('home'); toggleMobileMenu()" class="hover:text-neutral-400">Home</a>
+        <a href="#" onclick="navigateTo('explore'); toggleMobileMenu()" class="hover:text-neutral-400">Explore Scents</a>
+        <a href="#" onclick="navigateTo('customize'); toggleMobileMenu()" class="hover:text-neutral-400">Customize Scent</a>
+        <a href="#" onclick="navigateTo('wishlist'); toggleMobileMenu()" class="hover:text-neutral-400">Wishlist</a>
+        <a href="#" onclick="navigateTo('cart'); toggleMobileMenu()" class="hover:text-neutral-400">Cart</a>
+    </div>
+
+    <main class="flex-grow pt-20">
+
+        <section id="view-home" class="page-view active min-h-[calc(100vh-5rem)] flex flex-col justify-center items-center px-4 pt-36 relative">
+            <div class="text-center max-w-2xl mx-auto space-y-12">
+                <img
+    src="https://i.postimg.cc/kghGjbRB/SADO-PNG.png"
+    alt="SADO Logo"
+    class="w-72 md:w-104 mx-auto animate-pulse"
+/>
+                <p class="text-xs md:text-sm tracking-[0.4em] uppercase text-neutral-400 font-light max-w-md mx-auto leading-relaxed">
+                    Elevating structural olfactory arts into minimal fluid statements.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
+                    <button onclick="navigateTo('explore')" class="w-64 sm:w-52 py-4 bg-black text-white text-xs uppercase tracking-widest font-medium rounded-full hover:bg-neutral-800 transition-all shadow-lg shadow-neutral-200 transform hover:-translate-y-0.5">
+                        Explore Scents
+                    </button>
+                    <button onclick="navigateTo('customize')" class="w-64 sm:w-52 py-4 bg-white text-black border border-neutral-200 text-xs uppercase tracking-widest font-medium rounded-full hover:bg-neutral-50 transition-all transform hover:-translate-y-0.5">
+                        Customize Your Scent
+                    </button>
+                </div>
+            </div>
+
+            <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 mt-24 px-6 w-full text-center">
+                <div class="p-6 border border-neutral-50 rounded-2xl">
+                    <h3 class="text-xs uppercase tracking-widest font-semibold mb-2">Curated Originals</h3>
+                    <p class="text-xs text-neutral-400 leading-relaxed">Explore iconic configurations mapped globally for superior longevity profiles.</p>
+                </div>
+                <div class="p-6 border border-neutral-50 rounded-2xl">
+                    <h3 class="text-xs uppercase tracking-widest font-semibold mb-2">Bespoke Lab Studio</h3>
+                    <p class="text-xs text-neutral-400 leading-relaxed">Control variables dynamically down to milligram measurements inside real glass arrays.</p>
+                </div>
+                <div class="p-6 border border-neutral-50 rounded-2xl">
+                    <h3 class="text-xs uppercase tracking-widest font-semibold mb-2">Pure Fluid Integrity</h3>
+                    <p class="text-xs text-neutral-400 leading-relaxed">Zero synthetic fillers. Premium imported raw oils processing 12-hour spatial projection ceilings.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-explore" class="page-view max-w-7xl mx-auto px-6 py-12">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 pb-6 border-b border-neutral-100">
+                <div>
+                    <button onclick="navigateTo('home')" class="text-xs uppercase tracking-widest text-neutral-400 hover:text-black mb-2 flex items-center space-x-1">
+                        <i class="fa-solid fa-arrow-left text-[10px]"></i> <span>Back to Main</span>
+                    </button>
+                    <h2 class="text-3xl font-light tracking-wide">The Collection</h2>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row items-stretch gap-3 w-full md:w-auto">
+                    <div class="relative flex-grow sm:w-64">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 text-xs"></i>
+                        <input type="text" id="search-input" placeholder="Search olfactive layers..." oninput="filterProducts()" class="w-full pl-10 pr-4 py-2.5 text-xs bg-neutral-50 border border-neutral-200 rounded-full focus:outline-none focus:border-black transition-colors">
+                    </div>
+                    <select id="filter-select" onchange="filterProducts()" class="px-4 py-2.5 text-xs bg-neutral-50 border border-neutral-200 rounded-full focus:outline-none focus:border-black text-neutral-600">
+                        <option value="all">All Profiles</option>
+                        <option value="high">Premium Class (> 2000 Tk)</option>
+                        <option value="standard">Standard Class (≤ 2000 Tk)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="explore-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                </div>
+        </section>
+
+        <section id="view-details" class="page-view max-w-7xl mx-auto px-6 py-12">
+            <button onclick="navigateTo('explore')" class="text-xs uppercase tracking-widest text-neutral-400 hover:text-black mb-8 flex items-center space-x-1">
+                <i class="fa-solid fa-arrow-left text-[10px]"></i> <span>Back to Collection</span>
+            </button>
+            
+            <div id="product-details-content" class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+                </div>
+
+            <div class="mt-20 pt-10 border-t border-neutral-100">
+                <h3 class="text-xs uppercase tracking-[0.25em] font-medium mb-8 text-neutral-500">More Perfume Collection</h3>
+                <div id="carousel-container" class="flex space-x-6 overflow-x-auto pb-6 no-scrollbar snap-x snap-mandatory">
+                    </div>
+            </div>
+        </section>
+
+        <section id="view-customize" class="page-view max-w-7xl mx-auto px-6 py-12">
+            <div class="mb-10">
+                <button onclick="navigateTo('home')" class="text-xs uppercase tracking-widest text-neutral-400 hover:text-black mb-2 flex items-center space-x-1">
+                    <i class="fa-solid fa-arrow-left text-[10px]"></i> <span>Back to home</span>
+                </button>
+                <h2 class="text-3xl font-light tracking-wide">Bespoke Lab Studio</h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                
+                <div class="lg:col-span-5 flex flex-col items-center justify-center bg-neutral-50/50 rounded-3xl p-12 min-h-[500px] border border-neutral-100">
+                    
+                    <div class="relative w-44 h-80 border-[5px] border-neutral-800 rounded-b-[3rem] rounded-t-[1.5rem] bg-transparent p-1 flex flex-col justify-end overflow-hidden shadow-2xl shadow-neutral-100">
+                        <div class="absolute -top-[5px] left-1/2 -translate-x-1/2 w-10 h-6 bg-neutral-800 rounded-t-md"></div>
+                        
+                        <div class="w-full h-full rounded-b-[2.5rem] rounded-t-[1rem] overflow-hidden flex flex-col justify-end relative bg-neutral-100/30">
+                            <div id="fluid-alcohol" class="fluid-layer w-full h-0 bg-sky-200/40 relative z-10 flex flex-col justify-end">
+                                <div id="fluid-booster" class="fluid-layer w-full h-0 bg-amber-200/60 flex flex-col justify-end">
+                                    <div id="fluid-oils" class="fluid-layer w-full h-0 bg-amber-500/50"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 text-center">
+                        <span class="text-[10px] tracking-widest font-medium text-neutral-400 uppercase">Current Capacity Matrix</span>
+                        <div class="text-3xl font-light mt-1"><span id="live-total-ml">0</span> <span class="text-sm">ml</span> / 15 ml</div>
+                        <div id="bottle-full-warning" class="text-[11px] text-red-500 font-medium tracking-wide mt-1 hidden">Maximum capacity ceiling threshold met.</div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-7 space-y-8">
+                    
+                    <div class="bg-white border border-neutral-100 p-6 rounded-2xl shadow-sm">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-sm font-semibold tracking-wider uppercase">1. Perfume Essential Oils <span class="text-xs font-normal text-neutral-400 lowercase">(50 Tk / ml)</span></h3>
+                        </div>
+                        <div id="custom-oils-list" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white border border-neutral-100 p-6 rounded-2xl shadow-sm flex flex-col justify-between">
+                            <div>
+                                <h3 class="text-sm font-semibold tracking-wider uppercase mb-1">2. Modifiers & Boosters</h3>
+                                <p class="text-[11px] text-neutral-400 mb-4">Increases strength +25%/ml (25 Tk/ml)</p>
+                            </div>
+                            <div class="flex items-center justify-between bg-neutral-50 px-4 py-2 rounded-full">
+                                <span class="text-xs font-medium text-neutral-600">Volume (ml)</span>
+                                <div class="flex items-center space-x-3">
+                                    <button onclick="updateIngredient('booster', -1)" class="w-7 h-7 rounded-full bg-white border border-neutral-200 flex items-center justify-center text-xs hover:bg-neutral-900 hover:text-white transition-all">-</button>
+                                    <span id="qty-booster" class="text-xs font-semibold w-4 text-center">0</span>
+                                    <button onclick="updateIngredient('booster', 1)" class="w-7 h-7 rounded-full bg-white border border-neutral-200 flex items-center justify-center text-xs hover:bg-neutral-900 hover:text-white transition-all">+</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white border border-neutral-100 p-6 rounded-2xl shadow-sm flex flex-col justify-between">
+                            <div>
+                                <h3 class="text-sm font-semibold tracking-wider uppercase mb-1">3. Denatured Alcohol Base</h3>
+                                <p class="text-[11px] text-neutral-400 mb-4">Drives diffusion & projection (15 Tk/ml)</p>
+                            </div>
+                            <div class="flex items-center justify-between bg-neutral-50 px-4 py-2 rounded-full">
+                                <span class="text-xs font-medium text-neutral-600">Volume (ml)</span>
+                                <div class="flex items-center space-x-3">
+                                    <button onclick="updateIngredient('alcohol', -1)" class="w-7 h-7 rounded-full bg-white border border-neutral-200 flex items-center justify-center text-xs hover:bg-neutral-900 hover:text-white transition-all">-</button>
+                                    <span id="qty-alcohol" class="text-xs font-semibold w-4 text-center">0</span>
+                                    <button onclick="updateIngredient('alcohol', 1)" class="w-7 h-7 rounded-full bg-white border border-neutral-200 flex items-center justify-center text-xs hover:bg-neutral-900 hover:text-white transition-all">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-neutral-900 text-white p-6 rounded-2xl space-y-4">
+                        <h4 class="text-xs uppercase tracking-widest text-neutral-400 font-semibold">Realtime Engine Diagnostics & Metrics</h4>
+                        
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-neutral-400">Longevity Projection Profile</span>
+                                    <span id="metric-longevity" class="font-medium text-white">0 Hours</span>
+                                </div>
+                                <div class="w-full bg-neutral-800 h-1 rounded-full overflow-hidden">
+                                    <div id="bar-longevity" class="bg-amber-400 h-full w-0 transition-all duration-300"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-neutral-400">Spatial Sillage / Projection Radius</span>
+                                    <span id="metric-projection" class="font-medium text-white">0 Hours</span>
+                                </div>
+                                <div class="w-full bg-neutral-800 h-1 rounded-full overflow-hidden">
+                                    <div id="bar-projection" class="bg-sky-400 h-full w-0 transition-all duration-300"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-neutral-400">Concentration Absolute Strength</span>
+                                    <span id="metric-strength" class="font-medium text-white">0%</span>
+                                </div>
+                                <div class="w-full bg-neutral-800 h-1 rounded-full overflow-hidden">
+                                    <div id="bar-strength" class="bg-emerald-400 h-full w-0 transition-all duration-300"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border border-neutral-200 p-6 rounded-2xl space-y-4">
+                        <h3 class="text-xs uppercase tracking-widest font-semibold text-neutral-400">Recipe Manifest Financial Breakdown</h3>
+                        <div id="recipe-invoice-items" class="text-xs space-y-2 divide-y divide-neutral-100">
+                            <p class="text-neutral-400 py-2 italic text-center">Awaiting matrix input parameters...</p>
+                        </div>
+                        <div class="pt-2 flex justify-between items-center text-sm font-bold border-t border-neutral-200">
+                            <span>Total Compound Valuation Cost</span>
+                            <span class="text-base" id="recipe-total-price">0 Tk</span>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4">
+                        <button onclick="openCheckout(true)" class="flex-grow py-4 bg-black text-white text-xs uppercase tracking-widest font-medium rounded-full hover:bg-neutral-800 transition-all shadow-md">
+                            Confirm Recipe & Forge Order
+                        </button>
+                        <button onclick="resetRecipe()" class="px-6 py-4 bg-white border border-neutral-200 text-neutral-500 hover:text-black hover:border-black text-xs uppercase tracking-widest font-medium rounded-full transition-all">
+                            Reset Formulation
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <section id="view-cart" class="page-view max-w-4xl mx-auto px-6 py-12">
+            <div class="mb-8">
+                <button onclick="navigateTo('explore')" class="text-xs uppercase tracking-widest text-neutral-400 hover:text-black mb-2 flex items-center space-x-1">
+                    <i class="fa-solid fa-arrow-left text-[10px]"></i> <span>Return to Matrix</span>
+                </button>
+                <h2 class="text-3xl font-light tracking-wide">Shopping Cart Inventory</h2>
+            </div>
+
+            <div id="cart-content" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                </div>
+        </section>
+
+        <section id="view-wishlist" class="page-view max-w-7xl mx-auto px-6 py-12">
+            <div class="mb-8">
+                <button onclick="navigateTo('explore')" class="text-xs uppercase tracking-widest text-neutral-400 hover:text-black mb-2 flex items-center space-x-1">
+                    <i class="fa-solid fa-arrow-left text-[10px]"></i> <span>Continue Exploration</span>
+                </button>
+                <h2 class="text-3xl font-light tracking-wide">Your Wishlist Artifacts</h2>
+            </div>
+
+            <div id="wishlist-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                </div>
+        </section>
+
+        <div id="checkout-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+            <div class="bg-white w-full max-w-lg rounded-3xl p-8 relative shadow-2xl transition-transform duration-300 scale-95 opacity-0 transform" id="checkout-modal-card">
+                <button onclick="closeCheckout()" class="absolute top-6 right-6 p-2 text-neutral-400 hover:text-black transition-colors" title="Close"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <h3 class="text-xl font-medium tracking-wide mb-1">Secure Checkout Protocol</h3>
+                <p class="text-xs text-neutral-400 mb-6">Complete the structure verification below to routing into fulfillment queues.</p>
+                
+                <form id="checkout-form" onsubmit="handleCheckoutSubmit(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] uppercase tracking-widest font-semibold text-neutral-500 mb-1">Full Legal Name</label>
+                        <input type="text" required id="form-name" placeholder="John Doe" class="w-full text-xs px-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:border-black bg-neutral-50/50">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] uppercase tracking-widest font-semibold text-neutral-500 mb-1">Complete Delivery Infrastructure Address</label>
+                        <textarea required id="form-address" rows="2" placeholder="House, Street, City, ZIP" class="w-full text-xs px-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:border-black bg-neutral-50/50"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] uppercase tracking-widest font-semibold text-neutral-500 mb-1">Contact Phone Channel Connection</label>
+                        <input type="tel" required id="form-phone" placeholder="017XXXXXXXX" class="w-full text-xs px-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:border-black bg-neutral-50/50">
+                    </div>
+                    <div class="p-4 bg-neutral-50 border border-neutral-100 rounded-xl">
+                        <div class="flex justify-between items-center text-xs mb-2">
+                            <span class="text-neutral-500">Gateway Merchant Number:</span>
+                            <span class="font-mono font-bold select-all text-neutral-800">01611028150</span>
+                        </div>
+                        <p class="text-[10px] text-neutral-400 leading-relaxed mb-3">Please send the calculated total valuation amount via bKash/Nagad merchant panel to the number above, then document the string token reference tracking number below.</p>
+                        <div>
+                            <label class="block text-[9px] uppercase tracking-widest font-bold text-neutral-600 mb-1">Payment Transaction Token Code (TxnID)</label>
+                            <input type="text" required id="form-txnid" placeholder="K7B3X9PL40" class="w-full text-xs px-4 py-2.5 bg-white border border-neutral-200 rounded-lg focus:outline-none focus:border-black uppercase">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full py-4 bg-black text-white text-xs uppercase tracking-widest font-semibold rounded-full hover:bg-neutral-800 transition-all mt-4">
+                        Confirm Order Signature & Route to WhatsApp
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-neutral-50 border-t border-neutral-100 mt-24">
+        <div class="max-w-7xl mx-auto px-6 py-16 grid grid-cols-1 md:grid-cols-12 gap-12 text-xs">
+            <div class="md:col-span-5 space-y-4">
+                <h4 class="flex items-center gap-2">
+    <img src="https://i.postimg.cc/kghGjbRB/SADO-PNG.png" alt="Logo" class="h-4 w-auto">
+    <span class="text-sm font-bold tracking-[0.2em] uppercase text-black">
+        Architecture Studio
+    </span>
+</h4>
+                <p class="text-neutral-400 leading-relaxed max-w-sm">
+                    SADO operates at the strict intersection of high architectural formulation geometry and elite molecular fluid mechanics. We curate bespoke sensory artifacts for sophisticated palettes globally.
+                </p>
+                <div class="flex space-x-4 pt-2 text-neutral-400">
+                    <a href="#" class="hover:text-black transition-colors"><i class="fa-brands fa-instagram text-base"></i></a>
+                    <a href="#" class="hover:text-black transition-colors"><i class="fa-brands fa-pinterest text-base"></i></a>
+                    <a href="https://www.facebook.com/profile.php?id=61591381222415"
+   target="_blank"
+   rel="noopener noreferrer"
+   class="hover:text-black transition-colors"><i class="fa-brands fa-facebook-f text-base"></i></a>
+                </div>
+            </div>
+            
+            <div class="md:col-span-4 space-y-3" id="contact-section">
+                <h4 class="text-xs font-semibold tracking-widest uppercase text-black">Contact Interface Hub</h4>
+                <p class="text-neutral-400">System Support Hotline: <span class="text-black font-medium">+880 1611028150</span></p>
+                <p class="text-neutral-400">Olfactive Inquiries: <span class="text-black font-medium">matrix@sado-scents.com</span></p>
+                <p class="text-neutral-400">HQ Lab Laboratory Coordinates: <span class="text-black font-medium">Dhaka, Bangladesh</span></p>
+            </div>
+
+            <div class="md:col-span-3 space-y-3">
+                <h4 class="text-xs font-semibold tracking-widest uppercase text-black">Internal Architecture Routing</h4>
+                <ul class="space-y-2 text-neutral-400">
+                    <li><a href="#" onclick="navigateTo('explore')" class="hover:text-black">The Core Collection</a></li>
+                    <li><a href="#" onclick="navigateTo('customize')" class="hover:text-black">Bespoke Customizer Engine</a></li>
+                    <li><a href="#" onclick="window.scrollTo({top:0, behavior:'smooth'})" class="hover:text-black">Back to Top Horizon</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-6 py-6 border-t border-neutral-100 flex flex-col sm:flex-row justify-between items-center text-[10px] text-neutral-400 tracking-wider uppercase">
+            <p>&copy; 2026 SADO Inc. All Rights Reserved. Manufactured and Engineered in Integrity.</p>
+            <p class="mt-2 sm:mt-0">Premium Minimalist System Deployment v4.0.2</p>
+        </div>
+    </footer>
+
+    <a href="https://wa.me/8801611028150" target="_blank" rel="noopener noreferrer" class="fixed bottom-6 right-6 w-12 h-12 bg-neutral-900 text-white rounded-full flex items-center justify-center shadow-2xl border border-neutral-800 hover:bg-black transition-all z-40 group transform hover:scale-105" title="Direct Channel Assist Line">
+        <i class="fa-brands fa-whatsapp text-lg"></i>
+        <span class="absolute right-14 bg-black text-white text-[9px] uppercase tracking-widest font-medium px-3 py-1.5 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-300 whitespace-nowrap">Direct Channel Assist</span>
+    </a>
+
+    <button id="btn-scroll-top" onclick="window.scrollTo({top:0, behavior:'smooth'})" class="fixed bottom-22 right-6 w-12 h-12 bg-white text-black border border-neutral-200 rounded-full flex items-center justify-center shadow-lg hover:bg-neutral-50 transition-all z-40 opacity-0 pointer-events-none transform translate-y-4 duration-300" title="Scroll to Horizon Top">
+        <i class="fa-solid fa-arrow-up text-xs"></i>
+    </button>
+
+
+    <script>
+        // 1. Immutable Master Core Product Structural Database Array
+        const PRODUCTS = [
+            { id: "dior-sauvage", name: "Dior Sauvage", perf: "10h Longevity / 3h Projection", price: 2450, img: "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&q=80&w=600", desc: "A radically fresh composition, dictated by a name that has the ring of a manifesto. Raw and noble all at once.", ingredients: "Calabrian Bergamot, Pepper, Lavender, Patchouli, Ambroxan", notes: "Fresh Spicy, Citrus, Amber, Woody", level: "Extrait de Parfum" },
+            { id: "bleu-de-chanel", name: "Bleu de Chanel", perf: "9h Longevity / 2.5h Projection", price: 2600, img: "https://images.unsplash.com/photo-1523293182086-7651a899d37f?auto=format&fit=crop&q=80&w=600", desc: "An ode to masculine freedom expressed in a woody aromatic fragrance with a captivating trail. A timeless scent housed in a bottle of deep and mysterious blue.", ingredients: "Grapefruit, Mint, Pink Pepper, Ginger, Jasmine, Incense", notes: "Citrus, Woody, Warm Spicy, Balsamic", level: "Eau de Parfum" },
+            { id: "creed-aventus", name: "Creed Aventus", perf: "12h Longevity / 4h Projection", price: 3850, img: "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&q=80&w=600", desc: "The exceptional Aventus was inspired by the dramatic life of a historic emperor, celebrating strength, power and success.", ingredients: "Pineapple, Bergamot, Birch, Moroccan Jasmine, Musk, Oakmoss", notes: "Fruity, Sweet, Woody, Smoky", level: "Millésime Imperial" },
+            { id: "versace-eros", name: "Versace Eros", perf: "11h Longevity / 3.5h Projection", price: 2100, img: "https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&q=80&w=600", desc: "Eros is the fragrance that interprets sublime masculinity through a luminous aura with an intense, vibrant, and glowing freshness.", ingredients: "Mint, Green Apple, Lemon, Tonka Bean, Ambrosan, Geranium", notes: "Vanilla, Aromatic, Green, Fresh Spicy", level: "Eau de Toilette Intense" },
+            { id: "hawas-ice", name: "Hawas Ice", perf: "12h Longevity / 4h Projection", price: 1950, img: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&q=80&w=600", desc: "An architectural sensory matrix engineered for extreme cooling execution profiles in intense ambient environments.", ingredients: "Frozen Apple, Italian Lemon, Star Anise, Cardamom, Plum, Driftwood", notes: "Aquatic, Aquatic Citrus, Frost Spice, Musky", level: "Eau de Parfum Intense" },
+            { id: "dunhill-icon", name: "Dunhill Icon", perf: "8h Longevity / 2h Projection", price: 1800, img: "https://images.unsplash.com/photo-1588405748373-122b2321bc31?auto=format&fit=crop&q=80&w=600", desc: "The perfect blend of classic engineering elegance and modern high design structural execution values for the global traveler.", ingredients: "Neroli, Bergamot, Black Pepper, Lavender, Cardamom, Oud, Vetiver", notes: "Aromatic Citrus, Fresh Cardamom, Woody Leather", level: "Eau de Parfum" },
+            { id: "tam-dao", name: "Tam Dao", perf: "7h Longevity / 2h Projection", price: 2900, img: "https://images.unsplash.com/photo-1616949755610-8c9bbc08f138?auto=format&fit=crop&q=80&w=600", desc: "A memory from childhood holy forests. An elite velvety smooth milk wood structure defining deep meditative tranquility spaces.", ingredients: "Goa Sandalwood, Rosewood, Cypress, Ambergris, White Musk", notes: "Woody Milky, Sandalwood Pure, Powdery", level: "Extrait de Parfum Matrix" },
+            { id: "vampire-blood", name: "Vampire Blood", perf: "12h Longevity / 4h Projection", price: 3200, img: "https://images.unsplash.com/photo-1595425970377-c9703cf48b6d?auto=format&fit=crop&q=80&w=600", desc: "An dark, avant-garde sensory configuration layout designed for midnight applications and extreme abstract statement profiles.", ingredients: "Black Rose, Metallic Iron Accents, Oud Smoke, Crimson Pomegranate, Vetiver Ash", notes: "Metallic Floral, Dark Smoky Leather, Sweet Crimson", level: "Pure Perfume Oil Absolute" }
+        ];
+
+        // 2. Mutable Application State Core Architecture Engine
+        let state = {
+            currentView: "home",
+            cart: JSON.parse(localStorage.getItem('sado_cart')) || [],
+            wishlist: JSON.parse(localStorage.getItem('sado_wishlist')) || [],
+            customizer: {
+                oils: {}, // dynamic key mapping: e.g. 'dior-sauvage': 2 (ml)
+                booster: 0,
+                alcohol: 0
+            },
+            checkoutTargetIsCustomizer: false
+        };
+
+        // Initialize App Component Setup Nodes
+        document.addEventListener("DOMContentLoaded", () => {
+            initProductsGrid();
+            initCustomizerPanel();
+            updateGlobalCounterBadges();
+            setupScrollMetrics();
+            
+            // Mobile Menu Control triggers binding
+            document.getElementById('mobile-menu-btn').addEventListener('click', toggleMobileMenu);
+            document.getElementById('mobile-close-btn').addEventListener('click', toggleMobileMenu);
+        });
+
+        // 3. Routing Engine View Controller System
+        function navigateTo(viewId, productId = null) {
+            window.scrollTo({top: 0, behavior: 'smooth'});
+            
+            document.querySelectorAll('.page-view').forEach(view => view.classList.remove('active'));
+            const targetView = document.getElementById(`view-${viewId}`);
+            if (targetView) targetView.classList.add('active');
+            
+            state.currentView = viewId;
+
+            // Context Routing Execution Adjustments
+            if (viewId === 'details' && productId) {
+                renderProductDetailsPage(productId);
+            } else if (viewId === 'cart') {
+                renderCartPage();
+            } else if (viewId === 'wishlist') {
+                renderWishlistPage();
+            } else if (viewId === 'explore') {
+                // reset layout values mapping inputs clear
+                document.getElementById('search-input').value = '';
+                document.getElementById('filter-select').value = 'all';
+                filterProducts();
+            }
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('translate-x-full');
+        }
+
+        // Utility Toast Alert Notifier Control
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        // 4. Products Inventory Compilation Framework (Explore Grid Engine)
+        function initProductsGrid() {
+            const grid = document.getElementById('explore-grid');
+            grid.innerHTML = PRODUCTS.map(p => {
+                const inWish = state.wishlist.includes(p.id) ? 'fa-solid' : 'fa-regular';
+                return `
+                    <div class="glass-card rounded-2xl overflow-hidden p-4 flex flex-col justify-between group dark-glass-hover relative shadow-sm">
+                        <button onclick="toggleWishlist('${p.id}', event)" class="absolute top-6 right-6 z-10 w-8 h-8 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-neutral-800 hover:text-black shadow-sm" title="Add to Wishlist">
+                            <i class="${inWish} fa-heart text-xs transition-colors" id="wish-icon-${p.id}"></i>
+                        </button>
+                        
+                        <div onclick="navigateTo('details', '${p.id}')" class="cursor-pointer space-y-4">
+                            <div class="w-full aspect-square rounded-xl overflow-hidden bg-neutral-100">
+                                <img src="${p.img}" alt="${p.name}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                            </div>
+                            <div>
+                                <span class="text-[10px] tracking-widest text-neutral-400 font-medium uppercase">${p.level || 'Eau De Parfum'}</span>
+                                <h3 class="text-sm font-semibold tracking-tight text-neutral-900 mt-0.5">${p.name}</h3>
+                                <p class="text-[11px] text-neutral-500 mt-1 font-light line-clamp-1"><i class="fa-solid fa-bolt text-[9px] mr-1"></i>${p.perf}</p>
+                                <div class="text-xs font-bold mt-2 text-black">${p.price} Tk</div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 mt-4 pt-2">
+                            <button onclick="addToCart('${p.id}', 1, true)" class="py-2.5 bg-neutral-900 text-white text-[10px] uppercase tracking-widest font-medium rounded-lg hover:bg-black transition-all">Order Now</button>
+                            <button onclick="addToCart('${p.id}', 1, false)" class="py-2.5 bg-white border border-neutral-200 text-neutral-800 text-[10px] uppercase tracking-widest font-medium rounded-lg hover:bg-neutral-50 transition-all flex items-center justify-center space-x-1">
+                                <i class="fa-solid fa-bag-shopping"></i> <span>+ Cart</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterProducts() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const filter = document.getElementById('filter-select').value;
+            const grid = document.getElementById('explore-grid');
+            
+            const filtered = PRODUCTS.filter(p => {
+                const matchesSearch = p.name.toLowerCase().includes(query) || p.notes.toLowerCase().includes(query);
+                if (filter === 'all') return matchesSearch;
+                if (filter === 'high') return matchesSearch && p.price > 2000;
+                if (filter === 'standard') return matchesSearch && p.price <= 2000;
+                return matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-12 text-center text-xs text-neutral-400 tracking-wider">No matching olfactive layers discovered in repository logs.</div>`;
+                return;
+            }
+
+            // Simple map rendering call override
+            grid.innerHTML = filtered.map(p => {
+                const inWish = state.wishlist.includes(p.id) ? 'fa-solid' : 'fa-regular';
+                return `
+                    <div class="glass-card rounded-2xl overflow-hidden p-4 flex flex-col justify-between group dark-glass-hover relative shadow-sm">
+                        <button onclick="toggleWishlist('${p.id}', event)" class="absolute top-6 right-6 z-10 w-8 h-8 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-neutral-800 hover:text-black shadow-sm">
+                            <i class="${inWish} fa-heart text-xs" id="wish-icon-${p.id}"></i>
+                        </button>
+                        <div onclick="navigateTo('details', '${p.id}')" class="cursor-pointer space-y-4">
+                            <div class="w-full aspect-square rounded-xl overflow-hidden bg-neutral-100">
+                                <img src="${p.img}" alt="${p.name}" class="w-full h-full object-cover transition-all duration-500 group-hover:scale-102">
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-semibold text-neutral-900">${p.name}</h3>
+                                <p class="text-[11px] text-neutral-500 mt-0.5">${p.perf}</p>
+                                <div class="text-xs font-bold mt-2">${p.price} Tk</div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 mt-4">
+                            <button onclick="addToCart('${p.id}', 1, true)" class="py-2.5 bg-neutral-900 text-white text-[10px] uppercase tracking-widest font-medium rounded-lg hover:bg-black transition-all">Order Now</button>
+                            <button onclick="addToCart('${p.id}', 1, false)" class="py-2.5 bg-white border border-neutral-200 text-neutral-800 text-[10px] uppercase tracking-widest font-medium rounded-lg hover:bg-neutral-50 transition-all"><i class="fa-solid fa-bag-shopping"></i></button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 5. Product Details Modal/View Builder Engine Segment
+        function renderProductDetailsPage(productId) {
+            const p = PRODUCTS.find(x => x.id === productId);
+            if (!p) return;
+
+            const container = document.getElementById('product-details-content');
+            container.innerHTML = `
+                <div class="lg:col-span-6 space-y-8">
+                    <div>
+                        <span class="text-xs tracking-widest font-semibold text-neutral-400 uppercase">${p.level} / Formula Log Matrix</span>
+                        <h2 class="text-4xl font-light tracking-tight mt-1 text-neutral-900">${p.name}</h2>
+                        <p class="text-xl font-bold text-neutral-900 mt-2">${p.price} Tk</p>
+                    </div>
+
+                    <div class="space-y-4 text-xs">
+                        <div class="pb-4 border-b border-neutral-100">
+                            <h4 class="font-semibold uppercase tracking-wider text-neutral-500 mb-1">Olfactive Conceptual Narrative</h4>
+                            <p class="text-neutral-600 leading-relaxed font-light">${p.desc}</p>
+                        </div>
+                        <div class="pb-4 border-b border-neutral-100">
+                            <h4 class="font-semibold uppercase tracking-wider text-neutral-500 mb-1">Chemical Compounds & Raw Ingredients</h4>
+                            <p class="text-neutral-800 font-medium">${p.ingredients}</p>
+                        </div>
+                        <div class="pb-4 border-b border-neutral-100">
+                            <h4 class="font-semibold uppercase tracking-wider text-neutral-500 mb-1">Dominant Structural Profile Notes</h4>
+                            <p class="text-neutral-800 font-medium">${p.notes}</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold uppercase tracking-wider text-neutral-500 mb-1">Benchmark Performance Verification Data</h4>
+                            <p class="text-neutral-800 font-medium"><i class="fa-solid fa-gauge-high mr-2 text-neutral-400"></i>${p.perf}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-6 space-y-6">
+                    <div class="w-full aspect-square rounded-3xl overflow-hidden bg-neutral-50 border border-neutral-100 shadow-inner">
+                        <img src="${p.img}" alt="${p.name}" class="w-full h-full object-cover">
+                    </div>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <button onclick="addToCart('${p.id}', 1, true)" class="sm:col-span-1 py-4 bg-black text-white text-xs uppercase tracking-widest font-semibold rounded-xl hover:bg-neutral-800 transition-all shadow-md">
+                            Order Now
+                        </button>
+                        <button onclick="addToCart('${p.id}', 1, false)" class="py-4 bg-white border border-neutral-200 text-neutral-800 text-xs uppercase tracking-widest font-semibold rounded-xl hover:bg-neutral-50 transition-all flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-bag-shopping"></i> <span>Add To Cart</span>
+                        </button>
+                        <button onclick="toggleWishlist('${p.id}', null)" class="py-4 bg-neutral-50 text-neutral-700 text-xs uppercase tracking-widest font-semibold rounded-xl hover:bg-neutral-100 transition-all flex items-center justify-center space-x-2">
+                            <i class="fa-regular fa-heart"></i> <span>Wishlist</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // Render Horizontal Scroll Carousel (More Collection)
+            const carousel = document.getElementById('carousel-container');
+            carousel.innerHTML = PRODUCTS.filter(x => x.id !== productId).map(item => `
+                <div onclick="navigateTo('details', '${item.id}')" class="w-48 shrink-0 cursor-pointer snap-start bg-neutral-50/50 p-3 rounded-xl border border-neutral-100 hover:border-neutral-300 transition-all group">
+                    <div class="w-full aspect-square rounded-lg overflow-hidden bg-white mb-2">
+                        <img src="${item.img}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-102 transition-transform">
+                    </div>
+                    <h5 class="text-xs font-semibold text-neutral-800 line-clamp-1">${item.name}</h5>
+                    <p class="text-[10px] text-neutral-500 font-bold mt-0.5">${item.price} Tk</p>
+                </div>
+            `).join('');
+        }
+
+        // 6. Dynamic Bespoke Scent Lab Studio Customizer Architecture Core
+        function initCustomizerPanel() {
+            const container = document.getElementById('custom-oils-list');
+            container.innerHTML = PRODUCTS.map(p => {
+                // Initialize state entry safety check hook
+                if (state.customizer.oils[p.id] === undefined) {
+                    state.customizer.oils[p.id] = 0;
+                }
+                return `
+                    <div class="flex items-center justify-between border border-neutral-100 p-3 rounded-xl bg-neutral-50/50">
+                        <div class="flex items-center space-x-3">
+                            <img src="${p.img}" class="w-8 h-8 rounded-full object-cover border border-neutral-200">
+                            <div>
+                                <h4 class="text-xs font-medium text-neutral-900">${p.name}</h4>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="updateOilQuantity('${p.id}', -1)" class="w-6 h-6 bg-white border border-neutral-200 text-neutral-600 rounded-full flex items-center justify-center text-xs font-bold hover:bg-neutral-900 hover:text-white transition-colors">-</button>
+                            <span id="qty-oil-${p.id}" class="text-xs font-bold w-4 text-center">0</span>
+                            <button onclick="updateOilQuantity('${p.id}', 1)" class="w-6 h-6 bg-white border border-neutral-200 text-neutral-600 rounded-full flex items-center justify-center text-xs font-bold hover:bg-neutral-900 hover:text-white transition-colors">+</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateOilQuantity(productId, amount) {
+            const currentTotal = calculateCurrentCustomizerVolume();
+            if (amount > 0 && currentTotal >= 15) {
+                showToast("Maximum formulation volume reached (15 ml limits exceeded)");
+                return;
+            }
+            
+            let val = state.customizer.oils[productId] || 0;
+            val += amount;
+            if (val < 0) val = 0;
+            
+            state.customizer.oils[productId] = val;
+            document.getElementById(`qty-oil-${productId}`).innerText = val;
+            
+            recalculateCustomizerEngineMetrics();
+        }
+
+        function updateIngredient(type, amount) {
+            const currentTotal = calculateCurrentCustomizerVolume();
+            if (amount > 0 && currentTotal >= 15) {
+                showToast("Maximum formulation volume reached (15 ml limits exceeded)");
+                return;
+            }
+
+            let val = state.customizer[type] || 0;
+            val += amount;
+            if (val < 0) val = 0;
+
+            state.customizer[type] = val;
+            document.getElementById(`qty-${type}`).innerText = val;
+
+            recalculateCustomizerEngineMetrics();
+        }
+
+        function calculateCurrentCustomizerVolume() {
+            let totalOils = Object.values(state.customizer.oils).reduce((a, b) => a + b, 0);
+            return totalOils + state.customizer.booster + state.customizer.alcohol;
+        }
+
+        function recalculateCustomizerEngineMetrics() {
+            const totalOilsVol = Object.values(state.customizer.oils).reduce((a, b) => a + b, 0);
+            const boosterVol = state.customizer.booster;
+            const alcoholVol = state.customizer.alcohol;
+            const absoluteTotalVol = totalOilsVol + boosterVol + alcoholVol;
+
+            // Update UI volume badges indicator panel
+            document.getElementById('live-total-ml').innerText = absoluteTotalVol;
+            if (absoluteTotalVol >= 15) {
+                document.getElementById('bottle-full-warning').classList.remove('hidden');
+            } else {
+                document.getElementById('bottle-full-warning').classList.add('hidden');
+            }
+
+            // 1. Dynamic Fluid Level Animation Percent Allocation Algorithm Mapping
+            // Container max capacity = 15ml. Convert to percentage heights.
+            const pctOils = (totalOilsVol / 15) * 100;
+            const pctBooster = (boosterVol / 15) * 100;
+            const pctAlcohol = (alcoholVol / 15) * 100;
+
+            // Render bottom up stacking visualization configuration layout structural adjustments
+            document.getElementById('fluid-oils').style.height = `${totalOilsVol > 0 ? 100 : 0}%`;
+            document.getElementById('fluid-booster').style.height = `${((totalOilsVol + boosterVol) / (totalOilsVol || 1)) * 100}%`;
+            document.getElementById('fluid-alcohol').style.height = `${(absoluteTotalVol / 15) * 100}%`;
+
+            // Adjust fluid dynamic shading blending calculations based on mixed compounds density variables
+            const uniqueOilsMixedCount = Object.values(state.customizer.oils).filter(v => v > 0).length;
+            const oilFluidElement = document.getElementById('fluid-oils');
+            if (uniqueOilsMixedCount > 1) {
+                oilFluidElement.style.backgroundColor = "rgba(180, 83, 9, 0.65)"; // blended deep amber matrix tint
+            } else {
+                oilFluidElement.style.backgroundColor = "rgba(245, 158, 11, 0.5)"; // crisp normal singular oil shade template
+            }
+
+            // 2. Performance Calculator System Verification Profile Logging Rules
+            // Longevity: 1ml oil = 1.5 hours, max 12 hours
+            let calculatedLongevity = totalOilsVol * 1.5;
+            if (calculatedLongevity > 12) calculatedLongevity = 12;
+
+            // Projection: 1ml alcohol = 1 hour, max 3.5 hours
+            let calculatedProjection = alcoholVol * 1.0;
+            if (calculatedProjection > 3.5) calculatedProjection = 3.5;
+
+            // Strength: 1ml booster = +25% baseline concentration matrix shift mapping bounds
+            let calculatedStrength = boosterVol * 25;
+
+            // Update DOM engine metrics output rows
+            document.getElementById('metric-longevity').innerText = `${calculatedLongevity.toFixed(1)} Hours`;
+            document.getElementById('metric-projection').innerText = `${calculatedProjection.toFixed(1)} Hours`;
+            document.getElementById('metric-strength').innerText = `${calculatedStrength}%`;
+
+            // Update execution progress lines indicators
+            document.getElementById('bar-longevity').style.width = `${(calculatedLongevity / 12) * 100}%`;
+            document.getElementById('bar-projection').style.width = `${(calculatedProjection / 3.5) * 100}%`;
+            document.getElementById('bar-strength').style.width = `${Math.min(calculatedStrength, 100)}%`;
+
+            // 3. Invoice Breakdown Matrix Generation Algorithm
+            const invoiceContainer = document.getElementById('recipe-invoice-items');
+            let invoiceHTML = '';
+            let totalCostValuation = 0;
+
+            // Oils iteration evaluation processing segment loop mapping arrays
+            Object.entries(state.customizer.oils).forEach(([id, qty]) => {
+                if (qty > 0) {
+                    const prod = PRODUCTS.find(x => x.id === id);
+                    const lineCost = qty * 50;
+                    totalCostValuation += lineCost;
+                    invoiceHTML += `
+                        <div class="flex justify-between items-center py-1.5">
+                            <span class="text-neutral-600 font-light">${prod.name} Essential Oil (${qty} ml)</span>
+                            <span class="font-medium text-neutral-900">${lineCost} Tk</span>
+                        </div>
+                    `;
+                }
+            });
+
+            // Boosters entry calculation evaluation row append matching algorithm
+            if (boosterVol > 0) {
+                const lineCost = boosterVol * 25;
+                totalCostValuation += lineCost;
+                invoiceHTML += `
+                    <div class="flex justify-between items-center py-1.5">
+                        <span class="text-neutral-600 font-light">Structure Modifiers / Booster Compound (${boosterVol} ml)</span>
+                        <span class="font-medium text-neutral-900">${lineCost} Tk</span>
+                    </div>
+                `;
+            }
+
+            // Alcohol Diluent tracking sequence block integration layout setup array
+            if (alcoholVol > 0) {
+                const lineCost = alcoholVol * 15;
+                totalCostValuation += lineCost;
+                invoiceHTML += `
+                    <div class="flex justify-between items-center py-1.5">
+                        <span class="text-neutral-600 font-light">Denatured Alcohol Carrier Base Solution (${alcoholVol} ml)</span>
+                        <span class="font-medium text-neutral-900">${lineCost} Tk</span>
+                    </div>
+                `;
+            }
+
+            if (invoiceHTML === '') {
+                invoiceContainer.innerHTML = `<p class="text-neutral-400 py-2 italic text-center">Awaiting matrix input parameters...</p>`;
+            } else {
+                invoiceContainer.innerHTML = invoiceHTML;
+            }
+
+            document.getElementById('recipe-total-price').innerText = `${totalCostValuation} Tk`;
+        }
+
+        function resetRecipe() {
+            state.customizer.oils = {};
+            state.customizer.booster = 0;
+            state.customizer.alcohol = 0;
+            
+            // clear DOM components nodes manually
+            initCustomizerPanel();
+            document.getElementById('qty-booster').innerText = '0';
+            document.getElementById('qty-alcohol').innerText = '0';
+            
+            recalculateCustomizerEngineMetrics();
+            showToast("Bespoke formula parameters initialized to zero clearance.");
+        }
+
+        // 7. Cart & Wishlist Fully Functional Core System Management Processing Engine
+        function addToCart(productId, qty = 1, autoRedirectToCheckout = false) {
+            const product = PRODUCTS.find(x => x.id === productId);
+            if (!product) return;
+
+            const existingIndex = state.cart.findIndex(item => item.id === productId);
+            if (existingIndex > -1) {
+                state.cart[existingIndex].quantity += qty;
+            } else {
+                state.cart.push({ id: productId, quantity: qty });
+            }
+
+            saveStateToLocalStorage();
+            updateGlobalCounterBadges();
+            showToast(`${product.name} locked into purchase array.`);
+
+            if (autoRedirectToCheckout) {
+                navigateTo('cart');
+                openCheckout(false);
+            }
+        }
+
+        function updateCartQuantity(productId, delta) {
+            const index = state.cart.findIndex(item => item.id === productId);
+            if (index === -1) return;
+
+            state.cart[index].quantity += delta;
+            if (state.cart[index].quantity <= 0) {
+                state.cart.splice(index, 1);
+            }
+
+            saveStateToLocalStorage();
+            updateGlobalCounterBadges();
+            renderCartPage();
+        }
+
+        function removeFromCart(productId) {
+            state.cart = state.cart.filter(item => item.id !== productId);
+            saveStateToLocalStorage();
+            updateGlobalCounterBadges();
+            renderCartPage();
+            showToast("Item purged from cart register index.");
+        }
+
+        function toggleWishlist(productId, event) {
+            if (event) event.stopPropagation();
+            
+            const idx = state.wishlist.indexOf(productId);
+            if (idx > -1) {
+                state.wishlist.splice(idx, 1);
+                showToast("Artifact disconnected from wishlist archive.");
+            } else {
+                state.wishlist.push(productId);
+                showToast("Artifact pinned to personal aesthetic database.");
+            }
+
+            saveStateToLocalStorage();
+            updateGlobalCounterBadges();
+            
+            // update icon states layout rendering flags conditionally based on page contexts
+            if (state.currentView === 'explore') {
+                initProductsGrid();
+            } else if (state.currentView === 'wishlist') {
+                renderWishlistPage();
+            } else if (state.currentView === 'details') {
+                renderProductDetailsPage(productId);
+            }
+        }
+
+        function moveWishlistItemToCart(productId) {
+            addToCart(productId, 1, false);
+            state.wishlist = state.wishlist.filter(id => id !== productId);
+            saveStateToLocalStorage();
+            updateGlobalCounterBadges();
+            renderWishlistPage();
+        }
+
+        function updateGlobalCounterBadges() {
+            const cartCountEl = document.getElementById('cart-count');
+            const totalCartItems = state.cart.reduce((sum, item) => sum + item.quantity, 0);
+            if (totalCartItems > 0) {
+                cartCountEl.innerText = totalCartItems;
+                cartCountEl.style.opacity = '1';
+            } else {
+                cartCountEl.style.opacity = '0';
+            }
+
+            const wishCountEl = document.getElementById('wishlist-count');
+            if (state.wishlist.length > 0) {
+                wishCountEl.innerText = state.wishlist.length;
+                wishCountEl.style.opacity = '1';
+            } else {
+                wishCountEl.style.opacity = '0';
+            }
+        }
+
+        function saveStateToLocalStorage() {
+            localStorage.setItem('sado_cart', JSON.stringify(state.cart));
+            localStorage.setItem('sado_wishlist', JSON.stringify(state.wishlist));
+        }
+
+        // 8. Page Rendering Engine View Builders for Cart & Wishlist Pages
+        function renderCartPage() {
+            const container = document.getElementById('cart-content');
+            if (state.cart.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full py-20 text-center space-y-4">
+                        <i class="fa-solid fa-bag-shopping text-neutral-200 text-5xl"></i>
+                        <p class="text-xs tracking-widest uppercase text-neutral-400">Your shopping cart asset arrays are currently unpopulated.</p>
+                        <button onclick="navigateTo('explore')" class="px-6 py-3 bg-black text-white text-[10px] uppercase tracking-widest font-semibold rounded-full hover:bg-neutral-800 transition-colors">Browse Olfactive Repository</button>
+                    </div>
+                `;
+                return;
+            }
+
+            let leftHTML = `<div class="lg:col-span-8 space-y-4">`;
+            let totalCartValuationAmount = 0;
+
+            state.cart.forEach(item => {
+                const prod = PRODUCTS.find(x => x.id === item.id);
+                if (!prod) return;
+                const rowTotal = prod.price * item.quantity;
+                totalCartValuationAmount += rowTotal;
+
+                leftHTML += `
+                    <div class="flex items-center justify-between border border-neutral-100 p-4 rounded-2xl bg-white shadow-sm group">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-16 h-16 rounded-xl overflow-hidden bg-neutral-50 shrink-0 border border-neutral-100">
+                                <img src="${prod.img}" class="w-full h-full object-cover">
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-semibold text-neutral-900">${prod.name}</h4>
+                                <span class="text-[10px] tracking-wider text-neutral-400 block mt-0.5">${prod.price} Tk</span>
+                                <button onclick="removeFromCart('${prod.id}')" class="text-[10px] uppercase tracking-wider text-neutral-400 hover:text-red-500 font-medium mt-1 transition-colors flex items-center space-x-1"><i class="fa-regular fa-trash-can text-[9px]"></i> <span>Purge</span></button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-6">
+                            <div class="flex items-center space-x-2.5 bg-neutral-50 px-3 py-1.5 rounded-full border border-neutral-200/50">
+                                <button onclick="updateCartQuantity('${prod.id}', -1)" class="text-xs font-bold text-neutral-500 hover:text-black w-4 text-center">-</button>
+                                <span class="text-xs font-bold text-neutral-900 w-4 text-center">${item.quantity}</span>
+                                <button onclick="updateCartQuantity('${prod.id}', 1)" class="text-xs font-bold text-neutral-500 hover:text-black w-4 text-center">+</button>
+                            </div>
+                            <span class="text-xs font-bold text-neutral-900 w-20 text-right">${rowTotal} Tk</span>
+                        </div>
+                    </div>
+                `;
+            });
+            leftHTML += `</div>`;
+
+            let rightHTML = `
+                <div class="lg:col-span-4 bg-neutral-50 border border-neutral-100 rounded-2xl p-6 space-y-6">
+                    <h3 class="text-xs uppercase tracking-widest font-bold text-neutral-800">Order Financial Statement Summary</h3>
+                    
+                    <div class="space-y-2 text-xs">
+                        <div class="flex justify-between text-neutral-500">
+                            <span>Subtotal Base Items</span>
+                            <span>${totalCartValuationAmount} Tk</span>
+                        </div>
+                        <div class="flex justify-between text-neutral-500">
+                            <span>Logistics Delivery Protocol</span>
+                            <span class="uppercase font-mono text-[10px] text-emerald-600 font-bold">Complimentary Free</span>
+                        </div>
+                        <div class="pt-4 border-t border-neutral-200 flex justify-between text-sm font-bold text-neutral-900">
+                            <span>Total Aggregate Price</span>
+                            <span>${totalCartValuationAmount} Tk</span>
+                        </div>
+                    </div>
+
+                    <button onclick="openCheckout(false)" class="w-full py-4 bg-black text-white text-xs uppercase tracking-widest font-semibold rounded-full hover:bg-neutral-800 transition-all shadow-md">
+                        Execute Checkout Signature Matrix
+                    </button>
+                </div>
+            `;
+
+            container.innerHTML = leftHTML + rightHTML;
+        }
+
+        function renderWishlistPage() {
+            const grid = document.getElementById('wishlist-grid');
+            if (state.wishlist.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-20 text-center space-y-4">
+                        <i class="fa-regular fa-heart text-neutral-200 text-5xl"></i>
+                        <p class="text-xs tracking-widest uppercase text-neutral-400">Your wishlist archive is empty.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = state.wishlist.map(id => {
+                const p = PRODUCTS.find(x => x.id === id);
+                if (!p) return '';
+                return `
+                    <div class="glass-card rounded-2xl overflow-hidden p-4 flex flex-col justify-between group relative shadow-sm">
+                        <button onclick="toggleWishlist('${p.id}', event)" class="absolute top-6 right-6 z-10 w-8 h-8 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-red-500 hover:text-neutral-400 shadow-sm">
+                            <i class="fa-solid fa-heart text-xs"></i>
+                        </button>
+                        <div class="space-y-4">
+                            <div class="w-full aspect-square rounded-xl overflow-hidden bg-neutral-100">
+                                <img src="${p.img}" alt="${p.name}" class="w-full h-full object-cover">
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-semibold text-neutral-900">${p.name}</h3>
+                                <p class="text-xs text-neutral-500 font-bold mt-1">${p.price} Tk</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 gap-2 mt-4">
+                            <button onclick="moveWishlistItemToCart('${p.id}')" class="py-2.5 bg-black text-white text-[10px] uppercase tracking-widest font-medium rounded-lg hover:bg-neutral-800 transition-all flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-bag-shopping"></i> <span>Migrate to Cart</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 9. Automated High-Level Checkout & Secure WhatsApp Payload Router Integration Form Engine
+        function openCheckout(isCustomizerContext = false) {
+            // Guard conditions checks before rendering operational checkout panels
+            if (isCustomizerContext) {
+                const vol = calculateCurrentCustomizerVolume();
+                if (vol <= 0) {
+                    showToast("Formulation structural error. Fluid mass cannot equal zero.");
+                    return;
+                }
+            } else {
+                if (state.cart.length === 0) {
+                    showToast("Operational error. Order tracking index manifests completely empty.");
+                    return;
+                }
+            }
+
+            state.checkoutTargetIsCustomizer = isCustomizerContext;
+            
+            const modal = document.getElementById('checkout-modal');
+            const card = document.getElementById('checkout-modal-card');
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                card.classList.remove('scale-95', 'opacity-0');
+                card.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeCheckout() {
+            const modal = document.getElementById('checkout-modal');
+            const card = document.getElementById('checkout-modal-card');
+            
+            card.classList.remove('scale-100', 'opacity-100');
+            card.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function handleCheckoutSubmit(e) {
+            e.preventDefault();
+
+            const customerName = document.getElementById('form-name').value;
+            const customerAddress = document.getElementById('form-address').value;
+            const customerPhone = document.getElementById('form-phone').value;
+            const txnId = document.getElementById('form-txnid').value.toUpperCase();
+
+            let messagePayloadString = '';
+
+            if (state.checkoutTargetIsCustomizer) {
+                // Compile Customizer Lab Formula Recipe Matrix Sheet Text Block Data Structures
+                const totalOilsVol = Object.values(state.customizer.oils).reduce((a, b) => a + b, 0);
+                const boosterVol = state.customizer.booster;
+                const alcoholVol = state.customizer.alcohol;
+                const totalVol = totalOilsVol + boosterVol + alcoholVol;
+
+                // Performance variables recalculation loop
+                let calcLongevity = Math.min(totalOilsVol * 1.5, 12);
+                let calcProjection = Math.min(alcoholVol * 1.0, 4);
+                let calcStrength = boosterVol * 25;
+
+                let valuationPrice = (totalOilsVol * 50) + (boosterVol * 25) + (alcoholVol * 15);
+
+                let mixedOilsManifestText = '';
+                Object.entries(state.customizer.oils).forEach(([id, qty]) => {
+                    if (qty > 0) {
+                        const p = PRODUCTS.find(x => x.id === id);
+                        mixedOilsManifestText += `   - ${p.name}: ${qty} ml\n`;
+                    }
+                });
+
+                messagePayloadString = `*SADO BESPOKE LAB FORMULA ORDER DETAILED RECIPE MANIFEST*\n` +
+                                       `========================================\n\n` +
+                                       `*CUSTOMER SECURE IDENTIFICATION METRICS*:\n` +
+                                       `• Name: ${customerName}\n` +
+                                       `• Phone Channel: ${customerPhone}\n` +
+                                       `• Routing Destination Address: ${customerAddress}\n\n` +
+                                       `*FORMULATION RECIPE COMPOSITION DESIGN*:\n` +
+                                       `${mixedOilsManifestText}` +
+                                       `• Modifier Booster Compound Vol: ${boosterVol} ml\n` +
+                                       `• Carrier Alcohol Base Vol: ${alcoholVol} ml\n` +
+                                       `• Cumulative Mass Capacity: ${totalVol} ml / 15 ml\n\n` +
+                                       `*ESTIMATED SCIENTIFIC PERFORMANCE RATINGS*:\n` +
+                                       `• Longevity: ${calcLongevity.toFixed(1)} Hours\n` +
+                                       `• Projection Radius: ${calcProjection.toFixed(1)} Hours\n` +
+                                       `• Structural Strength Offset: +${calcStrength}%\n\n` +
+                                       `*FINANCIAL SETTIEMENT TRANSACTION DATA*:\n` +
+                                       `• Verified Formula Billable Cost: ${valuationPrice} Tk\n` +
+                                       `• Payment Reference Signature TxnID: ${txnId}\n\n` +
+                                       `========================================\n` +
+                                       `_System Status Code: FORGED_SUCCESS_`;
+            } else {
+                // Compile Standard Shop Inventory Order Logging Text Structure Layout Elements
+                let itemsListText = '';
+                let aggregateTotalPriceCalculated = 0;
+
+                state.cart.forEach(item => {
+                    const prod = PRODUCTS.find(x => x.id === item.id);
+                    if (!prod) return;
+                    const linePrice = prod.price * item.quantity;
+                    aggregateTotalPriceCalculated += linePrice;
+                    itemsListText += `• ${prod.name} (Qty: ${item.quantity}) - [${linePrice} Tk]\n`;
+                });
+
+                messagePayloadString = `*SADO OFFICIAL REPOSITORY PURCHASE ORDER REGULATION REPORT*\n` +
+                                       `========================================\n\n` +
+                                       `*CUSTOMER DELIVERY DESTINATION ROUTING LOGISTICS*:\n` +
+                                       `• Name: ${customerName}\n` +
+                                       `• Phone Connection Line: ${customerPhone}\n` +
+                                       `• Address: ${customerAddress}\n\n` +
+                                       `*PRODUCT ARRAYS SELECTED ORDER INDEX*:\n` +
+                                       `${itemsListText}\n` +
+                                       `*FINANCIAL DEPLOYMENT AUDIT AUDITING SUMMARY*:\n` +
+                                       `• Grand Total Valuation Bill: ${aggregateTotalPriceCalculated} Tk\n` +
+                                       `• Gateway Secure Token Reference TxnID: ${txnId}\n\n` +
+                                       `========================================\n` +
+                                       `_System Status Code: PACKAGING_QUEUE_ACTIVE_`;
+            }
+
+            // Execute programmatic URI URL parameter injection encoding pipeline sequences
+            const finalEncryptedWhatsAppUrlTokenRoute = `https://wa.me/8801611028150?text=${encodeURIComponent(messagePayloadString)}`;
+            
+            // Clear runtime state storage traces securely to guard double transactions processing
+            if (state.checkoutTargetIsCustomizer) {
+                resetRecipe();
+            } else {
+                state.cart = [];
+                saveStateToLocalStorage();
+                updateGlobalCounterBadges();
+            }
+
+            closeCheckout();
+            showToast("Signature authorization accepted. Re-routing package vectors to terminal...");
+            
+            // Execute external environment frame escape vector switch
+            setTimeout(() => {
+                window.open(finalEncryptedWhatsAppUrlTokenRoute, '_blank');
+            }, 800);
+        }
+
+        // 10. Secondary Helper Utility Components Scroll Metrics Monitors Hooks
+        function setupScrollMetrics() {
+            const btn = document.getElementById('btn-scroll-top');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 400) {
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                    btn.style.transform = 'translateY(0)';
+                } else {
+                    btn.style.opacity = '0';
+                    btn.style.pointerEvents = 'none';
+                    btn.style.transform = 'translateY(16px)';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
